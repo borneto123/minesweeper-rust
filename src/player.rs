@@ -1,5 +1,10 @@
 pub struct Player {
     id: i64,
-    name: String,    
+    display_name: String,
+    stats: Stats,    
 }
 
+
+pub struct Stats {
+
+}
