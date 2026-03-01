@@ -1,11 +1,10 @@
-pub struct Tile {
-    state: TileState,
+pub enum Tile {
+    Hidden(TileContent),
+    Flagged(TileContent),
+    Revealed(TileContent)
 }
 
-
-enum TileState {
+pub enum TileContent {
     Mine,
-    Flag,
-    Hidden,
-    Revealed,
+    Empty(u8),
 }
