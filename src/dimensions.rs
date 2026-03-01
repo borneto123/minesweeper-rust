@@ -1,5 +1,6 @@
 use crate::coords::{Coords, CoordsOutOfBoundsError};
 
+
 pub struct Dimensions {
     row_count: usize,
     col_count: usize,

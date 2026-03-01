@@ -1,10 +1,9 @@
 use crate::coords::Coords;
 use crate::tile::{Tile, TileContent};
-use crate::dimensions::Dimensions;
+use crate::dimensions::{self, Dimensions};
 
 
 pub struct Board {
-    dimensions: Dimensions,
     config: BoardConfig,
     tiles : Vec<Tile>,
 }
@@ -14,14 +13,44 @@ pub struct BoardConfig{
     mine_count: u64,
 }
 
+impl BoardConfig {
+    pub fn new(dimensions: Dimensions, mine_count: u64) -> BoardConfig {
+        BoardConfig{
+            dimensions,
+            mine_count,
+        }
+    }
+}
+
+
 impl Board {
-    /* 
+     
     pub fn new(config: BoardConfig) -> Self {
-        // Filling all tiles with HiddenEmpty(0)
-        let tiles = vec![Tile::Hidden(TileContent::Empty(0)); config.dimensions.area()];
+        let vec_size = config.dimensions.area();
+        let tiles = vec![Tile::default(); vec_size];
+        let mut mine_count = config.mine_count;
+
+        let mut board = Board { config, tiles };
+
+        while mine_count !=0 {
+
+            let rand_coords = Coords::new_rand(&board.config.dimensions);
+
+            let tile = board.get_tile_mut(&rand_coords).unwrap();
+
+            if tile.place_mine().is_ok() {
+                mine_count -= 1;
+            }
+        }
+
+        board
 
     }
-*/
+
+    pub fn tiles (&self) -> &Vec<Tile> {
+        &self.tiles
+    }
+
     pub fn iter(&self) -> BoardIter<'_> {
         BoardIter {
             board: &self,
@@ -30,9 +59,15 @@ impl Board {
     }
 
     pub fn get_tile(&self, coords: &Coords) -> Option<&Tile> {
-        let index = coords.to_index(&self.dimensions).ok()?;
+        let index = coords.to_index(&self.config.dimensions).ok()?;
         Some(&self.tiles[index])
     }
+
+    pub fn get_tile_mut(&mut self, coords: &Coords) -> Option<&mut Tile> {
+        let index = coords.to_index(&self.config.dimensions).ok()?;
+        Some(&mut self.tiles[index])
+    }
+
 }
 
 
@@ -47,9 +82,31 @@ impl <'a> Iterator for BoardIter<'a> {
     fn next(&mut self) -> Option<Self::Item> {
 
        // Returns None if out of bounds
-        let coords = Coords::from_index(&self.index, &self.board.dimensions).ok()?;
+        let coords = Coords::from_index(&self.index, &self.board.config.dimensions).ok()?;
         let old_index = self.index;
         self.index += 1;
         Some((coords, &self.board.tiles[old_index]))
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn new() {
+        let dim = Dimensions::new(10, 10);
+        let cfg = BoardConfig::new(dim, 10);
+        let board = Board::new(cfg);
+
+
+
+         for (coords, tile) in board.iter() {
+            if tile.is_mine() {
+            println!("{}, {}",coords.row(), coords.col());
+            }
+        }
+
     }
 }
