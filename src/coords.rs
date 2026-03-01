@@ -23,12 +23,12 @@ impl Coords {
         self.col
     }
 
-    pub fn to_index(&self, dim: Dimensions) -> Result<usize, CoordsOutOfBoundsError>{
+    pub fn to_index(&self, dim: &Dimensions) -> Result<usize, CoordsOutOfBoundsError>{
        dim.contains(self)?;
        Ok(self.col + self.row * dim.col_count())
     }
 
-    pub fn from_index(index: usize, dim: Dimensions) -> Result<Coords, IndexOutOfBounds> {
+    pub fn from_index(index: &usize, dim: &Dimensions) -> Result<Coords, IndexOutOfBounds> {
         let row = index / dim.col_count();
         let col = index % dim.col_count();
 
@@ -64,7 +64,7 @@ mod tests {
     fn to_index_1() {
         let dim = Dimensions::new(5, 2);
         let coords = Coords::new(2, 1);
-        let rez = coords.to_index(dim);
+        let rez = coords.to_index(&dim);
 
         assert!(matches!(rez, Ok(5)));
     }
@@ -73,7 +73,7 @@ mod tests {
     fn to_index_2() {
         let dim = Dimensions::new(3, 4);
         let coords = Coords::new(2, 2);
-        let rez = coords.to_index(dim);
+        let rez = coords.to_index(&dim);
 
         assert!(matches!(rez, Ok(10)));
     }
@@ -82,7 +82,7 @@ mod tests {
     fn to_index_3() {
         let dim = Dimensions::new(3, 4);
         let coords = Coords::new(4, 4);
-        let rez = coords.to_index(dim);
+        let rez = coords.to_index(&dim);
 
         assert!(matches!(rez, Err(CoordsOutOfBoundsError::BothOutOfBounds)));
     }
@@ -90,7 +90,7 @@ mod tests {
     fn from_index_1() {
         let dim = Dimensions::new(3, 4);
         let index = 10;
-        let rez = Coords::from_index(index, dim).unwrap();
+        let rez = Coords::from_index(&index, &dim).unwrap();
         dbg!(rez);
         assert_eq!(rez, Coords::new(2, 2));
     }
@@ -98,7 +98,7 @@ mod tests {
     fn from_index_2() {
         let dim = Dimensions::new(3, 4);
         let index = 10;
-        let rez = Coords::from_index(index, dim).unwrap();
+        let rez = Coords::from_index(&index, &dim).unwrap();
         dbg!(rez);
         assert_eq!(rez, Coords::new(2, 2));
     }
