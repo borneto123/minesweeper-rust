@@ -1,3 +1,5 @@
+use rand::RngExt;
+
 use crate::dimensions::Dimensions;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -27,6 +29,17 @@ impl Coords {
        Ok(self.col + self.row * dim.col_count())
     }
 
+    pub fn new_rand(dim: &Dimensions) -> Self {
+        let mut rng = rand::rng();
+        let row = rng.random_range(0..dim.row_count());
+        let col = rng.random_range(0..dim.col_count());
+
+        Coords{
+            row,
+            col,
+        }
+    }
+
     pub fn from_index(index: &usize, dim: &Dimensions) -> Result<Coords, IndexOutOfBounds> {
         let row = index / dim.col_count();
         let col = index % dim.col_count();
@@ -40,6 +53,8 @@ impl Coords {
 
         Ok(res)
     }
+
+    
 
 }
 
