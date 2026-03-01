@@ -21,6 +21,10 @@ impl Dimensions {
         self.col_count
     }
 
+    pub fn area(&self) -> usize {
+        self.row_count * self.col_count
+    }
+
     pub fn contains(&self, coords: &Coords) -> Result<(), CoordsOutOfBoundsError> {
         match (
             coords.row() >= self.row_count,
