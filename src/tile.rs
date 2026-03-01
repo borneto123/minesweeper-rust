@@ -9,3 +9,9 @@ pub enum TileContent {
     Mine,
     Empty(u8),
 }
+
+impl Default for Tile {
+    fn default() -> Self {
+        Self::Hidden(TileContent::Empty(0))
+    }
+}
