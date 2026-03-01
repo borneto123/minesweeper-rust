@@ -1,6 +1,5 @@
-use std::ops::Index;
-
 use crate::dimensions::Dimensions;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Coords {
     row: usize,
@@ -54,9 +53,7 @@ pub enum CoordsOutOfBoundsError {
 pub struct IndexOutOfBounds;
 #[cfg(test)]
 mod tests {
-    use std::usize;
 
-    use crate::coords;
 
     use super::*;
 
