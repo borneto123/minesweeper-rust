@@ -1,6 +1,6 @@
 use crate::coords::Coords;
 use crate::tile::{Tile, TileContent};
-use crate::dimensions::{self, Dimensions};
+use crate::dimensions::{Dimensions};
 
 
 pub struct Board {
@@ -28,24 +28,32 @@ impl Board {
     pub fn new(config: BoardConfig) -> Self {
         let vec_size = config.dimensions.area();
         let tiles = vec![Tile::default(); vec_size];
-        let mut mine_count = config.mine_count;
 
         let mut board = Board { config, tiles };
 
+        board.fill_board();
+
+        board
+
+    }
+
+    fn fill_board(&mut self) {
+        let mut mine_count = self.config.mine_count;
         while mine_count !=0 {
 
-            let rand_coords = Coords::new_rand(&board.config.dimensions);
+            let rand_coords = Coords::new_rand(&self.config.dimensions);
 
-            let tile = board.get_tile_mut(&rand_coords).unwrap();
+            let tile = self.get_tile_mut(&rand_coords).unwrap();
 
             if tile.place_mine().is_ok() {
                 mine_count -= 1;
             }
         }
-
-        board
-
     }
+
+    // pub fn _get_neighbours(tile: Tile) -> Vec<Tile> {
+        
+    // } 
 
     pub fn tiles (&self) -> &Vec<Tile> {
         &self.tiles
@@ -100,13 +108,10 @@ mod tests {
         let cfg = BoardConfig::new(dim, 10);
         let board = Board::new(cfg);
 
-
-
-         for (coords, tile) in board.iter() {
+        for (coords, tile) in board.iter() {
             if tile.is_mine() {
             println!("{}, {}",coords.row(), coords.col());
             }
         }
-
     }
 }

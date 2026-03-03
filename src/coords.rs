@@ -53,10 +53,10 @@ impl Coords {
 
         Ok(res)
     }
-
-    
-
 }
+
+
+
 
 pub enum CoordsOutOfBoundsError {
     BothOutOfBounds,
