@@ -31,10 +31,11 @@ impl Dimensions {
     }
 
     pub fn contains(&self, coords: &Coords) -> Result<(), CoordsOutOfBoundsError> {
-        match (
-            coords.row() >= self.row_count,
-            coords.col() >= self.col_count,
-        ) {
+
+        let row_valid = coords.row() >= self.row_count || coords.row() < 0;
+        let col_valid = coords.col() >= self.col_count || coords.col() < 0;
+
+        match (row_valid, col_valid) {
             (true, true) => Err(CoordsOutOfBoundsError::BothOutOfBounds),
 
             (true, false) => Err(CoordsOutOfBoundsError::RowOutOfBounds),
@@ -84,5 +85,13 @@ mod tests {
         let cords = Coords::new(1   , 5);
         let res = dim.contains(&cords);
         assert!(matches!(res, Err(CoordsOutOfBoundsError::ColOutOfBounds)));
+    }
+    #[test]
+    fn contains_5() {
+        let dim = Dimensions::new(2, 4).unwrap();
+        let cords = Coords::new(-1   , 3);
+        let res = dim.contains(&cords);
+        dbg!(&res);
+        assert!(matches!(res, Err(CoordsOutOfBoundsError::RowOutOfBounds)));
     }
 }
