@@ -1,6 +1,8 @@
+use std::ops::{self};
+
 use rand::RngExt;
 
-use crate::{dimensions::Dimensions};
+use crate::dimensions::{ Dimensions};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Coords {
@@ -53,11 +55,55 @@ impl Coords {
 
         Ok(res)
     }
+
+    pub fn offsets() -> Vec<Coords> {
+        let offsets = vec![
+            Coords {col: 0, row: 1},
+            Coords {col: 0, row: -1},
+            Coords {col: 1, row: 0},
+            Coords {col: 1, row: 1},
+            Coords {col: 1, row: -1},
+            Coords {col: -1, row: 0},
+            Coords {col: -1, row: 1},
+            Coords {col: -1, row: -1},
+        ];
+        offsets
+    }
+
+     pub fn get_neighbours(&self, dim: &Dimensions) -> Vec<Coords> {
+        let mut res: Vec<Coords> = Vec::new();
+        for offset in Coords::offsets(){
+            let coord_offset = *self + offset;
+            if dim.contains(&coord_offset).is_ok() {
+                res.push(coord_offset);
+            }
+        }
+        res
+    }
+
 }
 
+impl Default for Coords {
+    fn default() -> Self {
+        Self {
+            row: 0,
+            col: 0,
+        }
+    }
+}
 
+impl ops::Add for Coords {
+    type Output = Coords;
 
+    fn add(self, rhs: Self) -> Coords {
+        Coords { 
+            row: self.row + rhs.row,
+            col: self.col + rhs.col
+        }
+    }
+}
 
+#[derive(Debug)]
 pub enum CoordsOutOfBoundsError {
     BothOutOfBounds,
     RowOutOfBounds,
@@ -113,5 +159,15 @@ mod tests {
         let rez = Coords::from_index(&index, &dim).unwrap();
         dbg!(rez);
         assert_eq!(rez, Coords::new(2, 2));
+    }
+
+    #[test]
+
+    fn get_neighbours_test(){
+        let dim = Dimensions::new(3, 4).unwrap();
+        let coords = Coords::new(0, 0);
+        for i in coords.get_neighbours(&dim) {
+            dbg!(i);
+        }
     }
 }

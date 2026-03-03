@@ -51,10 +51,7 @@ impl Board {
         }
     }
 
-/*     pub fn get_neighbours(tile: Tile) -> Vec<Tile> {
 
-    } 
-*/
     pub fn tiles (&self) -> &Vec<Tile> {
         &self.tiles
     }
@@ -100,7 +97,6 @@ impl <'a> Iterator for BoardIter<'a> {
 
 #[cfg(test)]
 mod tests {
-    use std::ops::SubAssign;
 
     use super::*;
 
