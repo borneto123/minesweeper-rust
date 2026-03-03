@@ -7,11 +7,15 @@ pub struct Dimensions {
 }
 
 impl Dimensions {
-    pub fn new(row_count: i32, col_count:i32) -> Self {
-        Self {
+    pub fn new(row_count: i32, col_count:i32) -> Option<Self> {
+        if row_count <= 0 || col_count <= 0 {
+            return None;
+        }
+
+        Some(Self {
             row_count,
             col_count,
-        }
+        })
     }
 
     pub fn row_count(&self) -> i32 {
@@ -52,7 +56,7 @@ mod tests {
 
     #[test]
     fn contains_1() {
-        let dim = Dimensions::new(10, 4);
+        let dim = Dimensions::new(10, 4).unwrap();
         let cords = Coords::new(2, 2);
         let res = dim.contains(&cords);
         assert!(matches!(res, Ok(())));
@@ -60,7 +64,7 @@ mod tests {
 
     #[test]
     fn contains_2() {
-        let dim = Dimensions::new(10, 4);
+        let dim = Dimensions::new(10, 4).unwrap();
         let cords = Coords::new(10, 2);
         let res = dim.contains(&cords);
         assert!(matches!(res, Err(CoordsOutOfBoundsError::RowOutOfBounds)));
@@ -68,7 +72,7 @@ mod tests {
 
     #[test]
     fn contains_3() {
-        let dim = Dimensions::new(10, 1);
+        let dim = Dimensions::new(10, 1).unwrap();
         let cords = Coords::new(10, 2);
         let res = dim.contains(&cords);
         assert!(matches!(res, Err(CoordsOutOfBoundsError::BothOutOfBounds)));
@@ -76,7 +80,7 @@ mod tests {
 
     #[test]
     fn contains_4() {
-        let dim = Dimensions::new(2, 4);
+        let dim = Dimensions::new(2, 4).unwrap();
         let cords = Coords::new(1   , 5);
         let res = dim.contains(&cords);
         assert!(matches!(res, Err(CoordsOutOfBoundsError::ColOutOfBounds)));

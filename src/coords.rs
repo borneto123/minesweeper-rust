@@ -74,7 +74,7 @@ mod tests {
 
     #[test]
     fn to_index_1() {
-        let dim = Dimensions::new(5, 2);
+        let dim = Dimensions::new(5, 2).unwrap();
         let coords = Coords::new(2, 1);
         let rez = coords.to_index(&dim);
 
@@ -83,7 +83,7 @@ mod tests {
 
     #[test]
     fn to_index_2() {
-        let dim = Dimensions::new(3, 4);
+        let dim = Dimensions::new(3, 4).unwrap();
         let coords = Coords::new(2, 2);
         let rez = coords.to_index(&dim);
 
@@ -92,7 +92,7 @@ mod tests {
 
     #[test]
     fn to_index_3() {
-        let dim = Dimensions::new(3, 4);
+        let dim = Dimensions::new(3, 4).unwrap();
         let coords = Coords::new(4, 4);
         let rez = coords.to_index(&dim);
 
@@ -100,7 +100,7 @@ mod tests {
     }
     #[test]
     fn from_index_1() {
-        let dim = Dimensions::new(3, 4);
+        let dim = Dimensions::new(3, 4).unwrap();
         let index = 10;
         let rez = Coords::from_index(&index, &dim).unwrap();
         dbg!(rez);
@@ -108,7 +108,7 @@ mod tests {
     }
     #[test]
     fn from_index_2() {
-        let dim = Dimensions::new(3, 4);
+        let dim = Dimensions::new(3, 4).unwrap();
         let index = 10;
         let rez = Coords::from_index(&index, &dim).unwrap();
         dbg!(rez);

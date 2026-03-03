@@ -106,7 +106,7 @@ mod tests {
 
     #[test]
     fn new() {
-        let dim = Dimensions::new(10, 10);
+        let dim = Dimensions::new(10, 10).unwrap();
         let cfg = BoardConfig::new(dim, 10);
         let board = Board::new(cfg);
 
