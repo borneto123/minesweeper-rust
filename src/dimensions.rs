@@ -2,27 +2,27 @@ use crate::coords::{Coords, CoordsOutOfBoundsError};
 
 
 pub struct Dimensions {
-    row_count: usize,
-    col_count: usize,
+    row_count: i32,
+    col_count: i32,
 }
 
 impl Dimensions {
-    pub fn new(row_count: usize, col_count:usize) -> Self {
+    pub fn new(row_count: i32, col_count:i32) -> Self {
         Self {
             row_count,
             col_count,
         }
     }
 
-    pub fn row_count(&self) -> usize {
+    pub fn row_count(&self) -> i32 {
         self.row_count
     }
 
-    pub fn col_count(&self) -> usize{
+    pub fn col_count(&self) -> i32{
         self.col_count
     }
 
-    pub fn area(&self) -> usize {
+    pub fn area(&self) -> i32 {
         self.row_count * self.col_count
     }
 

@@ -10,11 +10,11 @@ pub struct Board {
 
 pub struct BoardConfig{
     dimensions: Dimensions,
-    mine_count: u64,
+    mine_count: i32,
 }
 
 impl BoardConfig {
-    pub fn new(dimensions: Dimensions, mine_count: u64) -> BoardConfig {
+    pub fn new(dimensions: Dimensions, mine_count: i32) -> BoardConfig {
         BoardConfig{
             dimensions,
             mine_count,
@@ -27,7 +27,7 @@ impl Board {
      
     pub fn new(config: BoardConfig) -> Self {
         let vec_size = config.dimensions.area();
-        let tiles = vec![Tile::default(); vec_size];
+        let tiles = vec![Tile::default(); vec_size as usize];
 
         let mut board = Board { config, tiles };
 
@@ -51,10 +51,10 @@ impl Board {
         }
     }
 
-    // pub fn _get_neighbours(tile: Tile) -> Vec<Tile> {
-        
-    // } 
+/*     pub fn get_neighbours(tile: Tile) -> Vec<Tile> {
 
+    } 
+*/
     pub fn tiles (&self) -> &Vec<Tile> {
         &self.tiles
     }
@@ -68,12 +68,12 @@ impl Board {
 
     pub fn get_tile(&self, coords: &Coords) -> Option<&Tile> {
         let index = coords.to_index(&self.config.dimensions).ok()?;
-        Some(&self.tiles[index])
+        Some(&self.tiles[index as usize])
     }
 
     pub fn get_tile_mut(&mut self, coords: &Coords) -> Option<&mut Tile> {
         let index = coords.to_index(&self.config.dimensions).ok()?;
-        Some(&mut self.tiles[index])
+        Some(&mut self.tiles[index as usize])
     }
 
 }
@@ -81,7 +81,7 @@ impl Board {
 
 pub struct BoardIter< 'a>{
     board: &'a Board,
-    index: usize,
+    index: i32,
 }
 
 impl <'a> Iterator for BoardIter<'a> {
@@ -93,13 +93,15 @@ impl <'a> Iterator for BoardIter<'a> {
         let coords = Coords::from_index(&self.index, &self.board.config.dimensions).ok()?;
         let old_index = self.index;
         self.index += 1;
-        Some((coords, &self.board.tiles[old_index]))
+        Some((coords, &self.board.tiles[old_index as usize]))
     }
 }
 
 
 #[cfg(test)]
 mod tests {
+    use std::ops::SubAssign;
+
     use super::*;
 
     #[test]
@@ -114,4 +116,5 @@ mod tests {
             }
         }
     }
+
 }

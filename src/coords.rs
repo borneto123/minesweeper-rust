@@ -1,30 +1,30 @@
 use rand::RngExt;
 
-use crate::dimensions::Dimensions;
+use crate::{dimensions::Dimensions};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Coords {
-    row: usize,
-    col: usize,
+    row: i32,
+    col: i32,
 }
 
 impl Coords {
-    pub fn new(row: usize, col: usize) -> Self {
+    pub fn new(row: i32, col: i32) -> Self {
         Self {
             row,
             col,
         }
     }
 
-    pub fn row(&self) -> usize {
+    pub fn row(&self) -> i32 {
         self.row
     }
 
-    pub fn col(&self) -> usize {
+    pub fn col(&self) -> i32 {
         self.col
     }
 
-    pub fn to_index(&self, dim: &Dimensions) -> Result<usize, CoordsOutOfBoundsError>{
+    pub fn to_index(&self, dim: &Dimensions) -> Result<i32, CoordsOutOfBoundsError>{
        dim.contains(self)?;
        Ok(self.col + self.row * dim.col_count())
     }
@@ -40,7 +40,7 @@ impl Coords {
         }
     }
 
-    pub fn from_index(index: &usize, dim: &Dimensions) -> Result<Coords, IndexOutOfBounds> {
+    pub fn from_index(index: &i32, dim: &Dimensions) -> Result<Coords, IndexOutOfBounds> {
         let row = index / dim.col_count();
         let col = index % dim.col_count();
 
