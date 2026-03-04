@@ -1,6 +1,6 @@
 use std::path::Iter;
 
-use crate::coords::Coords;
+use crate::coords::{self, Coords};
 use crate::tile::{self, Tile, TileContent};
 use crate::dimensions::{Dimensions};
 
@@ -34,6 +34,7 @@ impl Board {
         let mut board = Board { config, tiles };
 
         board.fill_board();
+        board.update_mine_neighbours();
 
         board
 
@@ -92,12 +93,32 @@ impl Board {
                 Some((coords, tile))
             })
     }
-    pub fn get_mines_iter(&self) -> impl Iterator<Item = (Coords, &Tile)>{
+    pub fn mines_iter(&self) -> impl Iterator<Item = (Coords, &Tile)>{
         self.iter().filter(|(_, tile)| {
             tile.is_mine()
         })
     }
 
+    pub fn mines_iter_mut(&mut self) -> impl Iterator<Item = (Coords, &mut Tile)>{
+        self.iter_mut().filter(|(_, tile)| {
+            tile.is_mine()
+        })
+    }
+
+    pub fn update_mine_neighbours(&mut self) {
+        
+        let mines_coords : Vec<Coords> = self.mines_iter()
+            .map(|(coords, _ )|{
+                coords
+            }).collect();
+
+        for mine_coords in mines_coords {
+            for tile_coords in mine_coords.get_neighbours(&self.config.dimensions){
+                let tile = self.get_tile_mut(&tile_coords).unwrap();
+                tile.increment_empty();
+            }
+        }
+    }
 }
 
 
@@ -109,17 +130,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn new() {
+    fn new_1() {
         let dim = Dimensions::new(10, 10).unwrap();
         let cfg = BoardConfig::new(dim, 10);
         let board = Board::new(cfg);
 
-        let mines = board.iter().filter(|tile | {
-            tile.1.is_mine()
-        });
-
-        for (coors, tile) in mines {
-            println!("{} {}", coors.row(), coors.col());
+        for (_, tile) in board.iter() {
+            dbg!(tile);
         }
     }
 

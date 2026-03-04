@@ -47,6 +47,17 @@ impl Tile {
         self.set_content(TileContent::Mine);
         Ok(())
     }
+    pub fn increment_empty(&mut self) {
+        match self {
+            Tile::Flagged(TileContent::Empty(n))
+            | Tile::Hidden(TileContent::Empty(n))
+            | Tile::Revealed(TileContent::Empty(n)) => {
+                *n += 1;
+            }
+            _ => {}
+        }
+    }
+
 }
 
 
