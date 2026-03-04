@@ -1,3 +1,5 @@
+use std::path::Iter;
+
 use crate::coords::Coords;
 use crate::tile::{self, Tile, TileContent};
 use crate::dimensions::{Dimensions};
@@ -55,13 +57,6 @@ impl Board {
         &self.tiles
     }
 
-    pub fn iter(&self) -> BoardIter<'_> {
-        BoardIter {
-            board: &self,
-            index: 0,
-        }
-    }
-
     pub fn get_tile(&self, coords: &Coords) -> Option<&Tile> {
         let index = coords.to_index(&self.config.dimensions).ok()?;
         Some(&self.tiles[index as usize])
@@ -72,31 +67,40 @@ impl Board {
         Some(&mut self.tiles[index as usize])
     }
 
+    pub fn iter(&self) -> impl Iterator<Item = (Coords, &Tile)> {
+        let dim = &self.config.dimensions;
+
+        self.tiles
+            .iter()
+            .enumerate()
+            .filter_map(move |(i, tile)| {
+                let idx = i as i32;
+                let coords = Coords::from_index(&idx, &dim).ok()?;
+                Some((coords, tile))
+            })
+    }
+
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = (Coords, &mut Tile)> {
+        let dim = &self.config.dimensions;
+
+        self.tiles
+            .iter_mut()
+            .enumerate()
+            .filter_map(move |(i, tile)| {
+                let idx = i as i32;
+                let coords = Coords::from_index(&idx, &dim).ok()?;
+                Some((coords, tile))
+            })
+    }
     pub fn get_mines_iter(&self) -> impl Iterator<Item = (Coords, &Tile)>{
         self.iter().filter(|(_, tile)| {
             tile.is_mine()
         })
     }
+
 }
 
 
-pub struct BoardIter< 'a>{
-    board: &'a Board,
-    index: i32,
-}
-
-impl <'a> Iterator for BoardIter<'a> {
-    type Item = (Coords, &'a Tile);
-
-    fn next(&mut self) -> Option<Self::Item> {
-
-       // Returns None if out of bounds
-        let coords = Coords::from_index(&self.index, &self.board.config.dimensions).ok()?;
-        let old_index = self.index;
-        self.index += 1;
-        Some((coords, &self.board.tiles[old_index as usize]))
-    }
-}
 
 
 #[cfg(test)]
