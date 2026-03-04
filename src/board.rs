@@ -1,5 +1,5 @@
 use crate::coords::Coords;
-use crate::tile::{Tile, TileContent};
+use crate::tile::{self, Tile, TileContent};
 use crate::dimensions::{Dimensions};
 
 
@@ -51,7 +51,6 @@ impl Board {
         }
     }
 
-
     pub fn tiles (&self) -> &Vec<Tile> {
         &self.tiles
     }
@@ -73,6 +72,11 @@ impl Board {
         Some(&mut self.tiles[index as usize])
     }
 
+    pub fn get_mines_iter(&self) -> impl Iterator<Item = (Coords, &Tile)>{
+        self.iter().filter(|(_, tile)| {
+            tile.is_mine()
+        })
+    }
 }
 
 
@@ -106,10 +110,12 @@ mod tests {
         let cfg = BoardConfig::new(dim, 10);
         let board = Board::new(cfg);
 
-        for (coords, tile) in board.iter() {
-            if tile.is_mine() {
-            println!("{}, {}",coords.row(), coords.col());
-            }
+        let mines = board.iter().filter(|tile | {
+            tile.1.is_mine()
+        });
+
+        for (coors, tile) in mines {
+            println!("{} {}", coors.row(), coors.col());
         }
     }
 
