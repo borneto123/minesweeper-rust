@@ -1,3 +1,5 @@
+use rand::distr::slice::Empty;
+
 #[derive(Debug, Clone)]
 pub enum Tile {
     Hidden(TileContent),
@@ -18,12 +20,26 @@ pub enum TileError {
 
 
 impl Tile {
-    pub fn is_mine(&self) -> bool {
-        matches!(self,
-            Tile::Hidden(TileContent::Mine)
-            | Tile::Flagged(TileContent::Mine)
-            | Tile::Revealed(TileContent::Mine)
-        )
+    pub fn content(&self) -> &TileContent {
+        match self {
+            Tile::Revealed(c)
+            | Tile::Hidden(c)
+            | Tile::Flagged(c)
+            => c
+        }
+    }
+
+    fn content_mut(&mut self) -> &mut TileContent {
+        match self {
+            Tile::Revealed(c)
+            | Tile::Hidden(c)
+            | Tile::Flagged(c)
+            => c
+        }
+    }
+
+    pub fn is_mine(&self) -> bool{
+        matches!(self.content(), TileContent::Mine)
     }
 
     pub fn update(&mut self, new_state: Tile) {
@@ -31,12 +47,7 @@ impl Tile {
     }
 
     pub fn set_content(&mut self, new_content: TileContent) {
-        match self {
-            Tile::Flagged(c)
-            | Tile::Revealed(c)
-            | Tile::Hidden(c) 
-            => *c = new_content
-        }
+        *self.content_mut() = new_content;
     }
 
     pub fn place_mine(&mut self) -> Result<(), TileError> {
@@ -48,14 +59,9 @@ impl Tile {
         Ok(())
     }
     pub fn increment_empty(&mut self) {
-        match self {
-            Tile::Flagged(TileContent::Empty(n))
-            | Tile::Hidden(TileContent::Empty(n))
-            | Tile::Revealed(TileContent::Empty(n)) => {
-                *n += 1;
-            }
-            _ => {}
-        }
+        if let TileContent::Empty(n) = self.content_mut() {
+            *n += 1;
+        } 
     }
 
 }
