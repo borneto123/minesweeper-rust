@@ -64,6 +64,16 @@ impl Tile {
         } 
     }
 
+    pub fn reveal_tile(&mut self) {
+        let content = self.content().clone();
+        self.update(Tile::Revealed(content));
+    }
+
+    pub fn flag_tile(&mut self) {
+        let content = self.content().clone();
+        self.update(Tile::Flagged(content));
+    }
+
 }
 
 
