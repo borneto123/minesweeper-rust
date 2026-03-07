@@ -1,4 +1,4 @@
-use rand::distr::slice::Empty;
+use std::mem::swap;
 
 #[derive(Debug, Clone)]
 pub enum Tile {
@@ -6,18 +6,22 @@ pub enum Tile {
     Flagged(TileContent),
     Revealed(TileContent)
 }
+
 #[derive(Debug, Clone)]
 pub enum TileContent {
     Mine,
     Empty(u8),
 }
+
 #[derive(Debug, Clone)]
 
-pub enum TileError {
+pub enum TilePlaceError {
     AlreadyHasMine,
 }
 
-
+pub enum TileRevealError {
+    AlreadyRevealed
+}
 
 impl Tile {
     pub fn content(&self) -> &TileContent {
@@ -42,7 +46,7 @@ impl Tile {
         matches!(self.content(), TileContent::Mine)
     }
 
-    pub fn update(&mut self, new_state: Tile) {
+    pub fn update_state(&mut self, new_state: Tile) {
         *self = new_state;
     }
 
@@ -50,11 +54,11 @@ impl Tile {
         *self.content_mut() = new_content;
     }
 
-    pub fn place_mine(&mut self) -> Result<(), TileError> {
+    pub fn place_mine(&mut self) -> Result<(), TilePlaceError> {
         if self.is_mine() {
-            return  Err(TileError::AlreadyHasMine);
+            return Err(TilePlaceError::AlreadyHasMine);
         }
-
+               
         self.set_content(TileContent::Mine);
         Ok(())
     }
@@ -64,14 +68,25 @@ impl Tile {
         } 
     }
 
+    fn take_content(&mut self) -> TileContent {
+        let mut tmp = Tile::Hidden(TileContent::Empty(0));
+        swap(self, &mut tmp);
+
+        match tmp {
+            Tile::Hidden(c)
+            | Tile::Revealed(c)
+            | Tile::Flagged(c) =>
+            c
+        }
+
+    }
+
     pub fn reveal_tile(&mut self) {
-        let content = self.content().clone();
-        self.update(Tile::Revealed(content));
+        *self = Tile::Revealed(self.take_content());
     }
 
     pub fn flag_tile(&mut self) {
-        let content = self.content().clone();
-        self.update(Tile::Flagged(content));
+        *self = Tile::Flagged(self.take_content());
     }
 
 }
