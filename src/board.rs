@@ -4,13 +4,15 @@ use std::path::Iter;
 use crate::action::{ActionError, RevealTileResult, SafeTile};
 use crate::coords::{self, Coords};
 use crate::tile::{self, Tile, TileContent};
-use crate::dimensions::{Dimensions};
+use crate::dimensions::{self, Dimensions};
 
 
 pub struct Board {
-    config: BoardConfig,
     tiles : Vec<Tile>,
-    hidden: i32,
+    dimensions: Dimensions,
+    mine_count: i32,
+    hidden_left: i32,
+
 }
 
 pub struct BoardConfig{
@@ -34,8 +36,16 @@ impl Board {
         let vec_size = config.dimensions.area();
         let tiles = vec![Tile::default(); vec_size as usize];
         let safe_tiles_left = vec_size  - config.mine_count;
+        let dimensions = config.dimensions;
+        let mine_count = config.mine_count;
 
-        let mut board = Board { config, tiles, hidden: safe_tiles_left };
+        let mut board = 
+            Board {
+                tiles,
+                hidden_left: safe_tiles_left,
+                dimensions,
+                mine_count,
+            };
 
         board.fill_board();
         board.update_mine_neighbours();
@@ -49,17 +59,17 @@ impl Board {
     }
 
     pub fn get_tile(&self, coords: &Coords) -> Option<&Tile> {
-        let index = coords.to_index(&self.config.dimensions).ok()?;
+        let index = coords.to_index(&self.dimensions).ok()?;
         Some(&self.tiles[index as usize])
     }
 
     pub fn get_tile_mut(&mut self, coords: &Coords) -> Option<&mut Tile> {
-        let index = coords.to_index(&self.config.dimensions).ok()?;
+        let index = coords.to_index(&self.dimensions).ok()?;
         Some(&mut self.tiles[index as usize])
     }
 
     pub fn iter(&self) -> impl Iterator<Item = (Coords, &Tile)> {
-        let dim = &self.config.dimensions;
+        let dim = &self.dimensions;
 
         self.tiles
             .iter()
@@ -72,7 +82,7 @@ impl Board {
     }
 
     pub fn iter_mut(&mut self) -> impl Iterator<Item = (Coords, &mut Tile)> {
-        let dim = &self.config.dimensions;
+        let dim = &self.dimensions;
 
         self.tiles
             .iter_mut()
@@ -96,10 +106,10 @@ impl Board {
     }
 
         fn fill_board(&mut self) {
-        let mut mine_count = self.config.mine_count;
+        let mut mine_count = self.mine_count;
         while mine_count !=0 {
 
-            let rand_coords = Coords::new_rand(&self.config.dimensions);
+            let rand_coords = Coords::new_rand(&self.dimensions);
 
             let tile = self.get_tile_mut(&rand_coords).unwrap();
 
@@ -117,7 +127,7 @@ impl Board {
             }).collect();
 
         for mine_coords in mines_coords {
-            for tile_coords in mine_coords.get_neighbours(&self.config.dimensions){
+            for tile_coords in mine_coords.get_neighbours(&self.dimensions){
                 let tile = self.get_tile_mut(&tile_coords).unwrap();
                 tile.increment_empty();
             }
@@ -125,11 +135,11 @@ impl Board {
     }
 
     fn no_safe_tiles_left(&self) -> bool {
-        self.hidden == 0
+        self.hidden_left == 0
     }
 
     fn single_reveal(&mut self, coords: &Coords) -> SafeTile {
-        self.hidden -= 1; // Function later
+        self.hidden_left -= 1; // Function later
         let tile = self.get_tile_mut(&coords).unwrap();
 
         tile.reveal_tile();
@@ -142,7 +152,7 @@ impl Board {
 
     fn flood_fill_reveal(&mut self, coords: &Coords) -> SafeTile {
         self.single_reveal(coords); // Problem
-        let dim = &self.config.dimensions;
+        let dim = &self.dimensions;
         let mut empty_neighbours = VecDeque::new();
         empty_neighbours.push_back(coords);
         

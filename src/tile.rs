@@ -1,9 +1,3 @@
-use std::mem::swap;
-
-use rand::distr::slice::Empty;
-
-use crate::tile;
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Tile {
     Hidden(TileContent),
@@ -107,7 +101,7 @@ impl Tile {
         match self {
             Tile::Flagged(_) => Err(TileFlagError::AlreadyFlagged),
             Tile::Revealed(_) => Err(TileFlagError::Revealed),
-            
+
             _ => {
                 *self = Tile::Flagged(self.take_content());
                 Ok(())
