@@ -54,7 +54,8 @@ impl Tile {
         match std::mem::replace(self, Tile::default()) {
             Tile::Hidden(c)
             | Tile::Revealed(c)
-            | Tile::Flagged(c) => c,
+            | Tile::Flagged(c)
+            => c,
         }
     }
 
@@ -106,12 +107,9 @@ impl Tile {
                 *self = Tile::Flagged(self.take_content());
                 Ok(())
             }
-        }
-        
+        }   
     }
-
 }
-
 
 impl Default for Tile {
     fn default() -> Self {

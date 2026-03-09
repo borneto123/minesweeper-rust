@@ -120,7 +120,7 @@ mod tests {
 
     #[test]
     fn to_index_1() {
-        let dim = Dimensions::new(5, 2).unwrap();
+        let dim = Dimensions::new(5, 2).ok().unwrap();
         let coords = Coords::new(2, 1);
         let rez = coords.to_index(&dim);
 
@@ -129,7 +129,7 @@ mod tests {
 
     #[test]
     fn to_index_2() {
-        let dim = Dimensions::new(3, 4).unwrap();
+        let dim = Dimensions::new(3, 4).ok().unwrap();
         let coords = Coords::new(2, 2);
         let rez = coords.to_index(&dim);
 
@@ -138,7 +138,7 @@ mod tests {
 
     #[test]
     fn to_index_3() {
-        let dim = Dimensions::new(3, 4).unwrap();
+        let dim = Dimensions::new(3, 4).ok().unwrap();
         let coords = Coords::new(4, 4);
         let rez = coords.to_index(&dim);
 
@@ -146,7 +146,7 @@ mod tests {
     }
     #[test]
     fn from_index_1() {
-        let dim = Dimensions::new(3, 4).unwrap();
+        let dim = Dimensions::new(3, 4).ok().unwrap();
         let index = 10;
         let rez = Coords::from_index(&index, &dim).unwrap();
         dbg!(rez);
@@ -154,7 +154,7 @@ mod tests {
     }
     #[test]
     fn from_index_2() {
-        let dim = Dimensions::new(3, 4).unwrap();
+        let dim = Dimensions::new(3, 4).ok().unwrap();
         let index = 10;
         let rez = Coords::from_index(&index, &dim).unwrap();
         dbg!(rez);
@@ -164,7 +164,7 @@ mod tests {
     #[test]
 
     fn get_neighbours_test(){
-        let dim = Dimensions::new(3, 4).unwrap();
+        let dim = Dimensions::new(3, 4).ok().unwrap();
         let coords = Coords::new(0, 0);
         for i in coords.get_neighbours(&dim) {
             dbg!(i);

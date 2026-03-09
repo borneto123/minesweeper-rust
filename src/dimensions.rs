@@ -6,13 +6,17 @@ pub struct Dimensions {
     col_count: i32,
 }
 
+pub  enum DimensionsError {
+    NegativeDimensions,
+}
+
 impl Dimensions {
-    pub fn new(row_count: i32, col_count:i32) -> Option<Self> {
+    pub fn new(row_count: i32, col_count:i32) -> Result<Self, DimensionsError> {
         if row_count <= 0 || col_count <= 0 {
-            return None;
+            return Err(DimensionsError::NegativeDimensions)
         }
 
-        Some(Self {
+        Ok(Self {
             row_count,
             col_count,
         })
@@ -57,7 +61,7 @@ mod tests {
 
     #[test]
     fn contains_1() {
-        let dim = Dimensions::new(10, 4).unwrap();
+        let dim = Dimensions::new(10, 4).ok().unwrap();
         let cords = Coords::new(2, 2);
         let res = dim.contains(&cords);
         assert!(matches!(res, Ok(())));
@@ -65,7 +69,7 @@ mod tests {
 
     #[test]
     fn contains_2() {
-        let dim = Dimensions::new(10, 4).unwrap();
+        let dim = Dimensions::new(10, 4).ok().unwrap();
         let cords = Coords::new(10, 2);
         let res = dim.contains(&cords);
         assert!(matches!(res, Err(CoordsOutOfBoundsError::RowOutOfBounds)));
@@ -73,7 +77,7 @@ mod tests {
 
     #[test]
     fn contains_3() {
-        let dim = Dimensions::new(10, 1).unwrap();
+        let dim = Dimensions::new(10, 1).ok().unwrap();
         let cords = Coords::new(10, 2);
         let res = dim.contains(&cords);
         assert!(matches!(res, Err(CoordsOutOfBoundsError::BothOutOfBounds)));
@@ -81,14 +85,14 @@ mod tests {
 
     #[test]
     fn contains_4() {
-        let dim = Dimensions::new(2, 4).unwrap();
+        let dim = Dimensions::new(2, 4).ok().unwrap();
         let cords = Coords::new(1   , 5);
         let res = dim.contains(&cords);
         assert!(matches!(res, Err(CoordsOutOfBoundsError::ColOutOfBounds)));
     }
     #[test]
     fn contains_5() {
-        let dim = Dimensions::new(2, 4).unwrap();
+        let dim = Dimensions::new(2, 4).ok().unwrap();
         let cords = Coords::new(-1   , 3);
         let res = dim.contains(&cords);
         dbg!(&res);
