@@ -1,23 +1,35 @@
-use rand::distr::slice::Empty;
-
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Tile {
     Hidden(TileContent),
     Flagged(TileContent),
     Revealed(TileContent)
 }
-#[derive(Debug, Clone)]
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TileContent {
     Mine,
     Empty(u8),
 }
+
 #[derive(Debug, Clone)]
 
-pub enum TileError {
-    AlreadyHasMine,
+pub enum PlaceMineError {
+    NotDefault
 }
 
+pub enum IncrementEmptyError {
+    NotEmpty
+}
 
+pub enum TileRevealError {
+    AlreadyRevealed,
+    Flagged,
+}
+
+pub enum TileFlagError{
+    AlreadyFlagged,
+    Revealed,
+}
 
 impl Tile {
     pub fn content(&self) -> &TileContent {
@@ -38,44 +50,66 @@ impl Tile {
         }
     }
 
+    fn take_content(&mut self) -> TileContent {
+        match std::mem::replace(self, Tile::default()) {
+            Tile::Hidden(c)
+            | Tile::Revealed(c)
+            | Tile::Flagged(c)
+            => c,
+        }
+    }
+
     pub fn is_mine(&self) -> bool{
         matches!(self.content(), TileContent::Mine)
     }
 
-    pub fn update(&mut self, new_state: Tile) {
-        *self = new_state;
+    pub fn is_revealed(&self) -> bool {
+        matches!(self, Tile::Revealed(_))
     }
 
-    pub fn set_content(&mut self, new_content: TileContent) {
-        *self.content_mut() = new_content;
-    }
+    pub fn increment_empty(&mut self) -> Result<(), IncrementEmptyError>{
+        match self.content_mut() {
+            TileContent::Empty(n) => {
+                *n += 1;
+                Ok(())
+            },
 
-    pub fn place_mine(&mut self) -> Result<(), TileError> {
-        if self.is_mine() {
-            return  Err(TileError::AlreadyHasMine);
+            _ => Err(IncrementEmptyError::NotEmpty)
         }
-
-        self.set_content(TileContent::Mine);
-        Ok(())
-    }
-    pub fn increment_empty(&mut self) {
-        if let TileContent::Empty(n) = self.content_mut() {
-            *n += 1;
-        } 
     }
 
-    pub fn reveal_tile(&mut self) {
-        let content = self.content().clone();
-        self.update(Tile::Revealed(content));
+    pub fn place_mine(&mut self) -> Result<(), PlaceMineError> {
+        if *self == Tile::default() {
+            *self.content_mut() = TileContent::Mine;
+            return Ok(())
+        }
+        Err(PlaceMineError::NotDefault)            
     }
 
-    pub fn flag_tile(&mut self) {
-        let content = self.content().clone();
-        self.update(Tile::Flagged(content));
+    pub fn reveal_tile(&mut self) -> Result<(), TileRevealError>{
+        match self {
+            Tile::Revealed(_) => Err(TileRevealError::AlreadyRevealed),
+            Tile::Flagged(_) => Err(TileRevealError::Flagged),
+
+            _ => {
+                *self = Tile::Revealed(self.take_content());
+                Ok(())
+            }
+        }
     }
 
+    pub fn flag_tile(&mut self) -> Result<(), TileFlagError>{
+        match self {
+            Tile::Flagged(_) => Err(TileFlagError::AlreadyFlagged),
+            Tile::Revealed(_) => Err(TileFlagError::Revealed),
+
+            _ => {
+                *self = Tile::Flagged(self.take_content());
+                Ok(())
+            }
+        }   
+    }
 }
-
 
 impl Default for Tile {
     fn default() -> Self {
