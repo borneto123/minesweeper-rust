@@ -1,8 +1,10 @@
+use std::fmt::Display;
+
 use crate::action::{ActionRevealError, RevealTileResult, SafeTile};
 use crate::coords::{ Coords};
-use crate::tile::{ Tile, TileContent};
+use crate::tile::{Tile, TileContent};
 use crate::dimensions::{Dimensions};
-
+#[derive(Debug)]
 
 pub struct Board {
     tiles : Vec<Tile>,
@@ -11,6 +13,7 @@ pub struct Board {
     hidden_left: i32,
 
 }
+#[derive(Debug)]
 
 pub struct BoardConfig{
     dimensions: Dimensions,
@@ -29,11 +32,13 @@ impl BoardConfig {
         })
     }
 }
+#[derive(Debug)]
 
 pub enum BoardError {
     MinePlacementFailed,
     UpdateMineNeighboursFailed,
 }
+#[derive(Debug)]
 
 pub enum BoardConfigError {
     IvalidMineCount,
@@ -142,7 +147,9 @@ impl Board {
                 let tile = self
                     .get_tile_mut(&tile_coords)
                     .ok_or(BoardError::UpdateMineNeighboursFailed)?;
-
+                if tile.is_mine() {
+                    continue;
+                }
                 tile.increment_empty().map_err(|_| BoardError::UpdateMineNeighboursFailed)?;
             }
         }
@@ -174,11 +181,24 @@ impl Board {
         let mut reveal_result : Option<SafeTile> = None;
 
         while let Some(coord) = stack.pop() {
-            reveal_result = Some(self.single_reveal(&coord)?);
-            revealed.push(coord);
 
+            let (is_hidden, is_zero) = {
+                let tile = self.get_tile(&coord).ok_or(ActionRevealError::Unknown)?;
+                (
+                    matches!(tile, Tile::Hidden(_)),
+                    matches!(tile, Tile::Hidden(TileContent::Empty(0))),
+                )
+            };
+
+            if is_hidden {
+                reveal_result = Some(self.single_reveal(&coord)?);
+                revealed.push(coord);
+            }
+
+            if is_zero {
             for neighbour in coord.get_neighbours(&self.dimensions) {
-                stack.push(neighbour);
+                    stack.push(neighbour);
+                }
             }
         }
         let reveal_result = reveal_result.ok_or(ActionRevealError::Unknown)?;
@@ -189,7 +209,6 @@ impl Board {
             SafeTile::Flood(_) => Err(ActionRevealError::Unknown),
         }
     }
-
 
     pub fn reveal_coord(&mut self, coord: &Coords) -> Result<RevealTileResult, ActionRevealError> {
         let tile = self
@@ -214,9 +233,27 @@ impl Board {
     }
  }
 
+impl Display for Board {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut current_row = 0;
+        for (coords, tile) in self.iter() {
+            if current_row != coords.row() {
+                writeln!(f)?;
+                current_row += 1;
+            }
+            write!(f, "{} ", tile)?;
+        }
+        writeln!(f)?;
+        Ok(())  
+    }
+}
+
+
 
 #[cfg(test)]
 mod tests {
+
+    use std::{env::set_current_dir, fmt::Debug};
 
     use super::*;
 
@@ -224,7 +261,11 @@ mod tests {
     fn new_1() {
         let dim = Dimensions::new(10, 10).ok().unwrap();
         let cfg = BoardConfig::new(dim, 10).ok().unwrap();
-        let board = Board::new(cfg).ok().unwrap();
+        let board = Board::new(cfg)
+            .unwrap_or_else(|err| {
+                println!("{:?}", err);
+                std::process::exit(1);
+            });
 
         for (_, tile) in board.iter() {
             dbg!(tile);
@@ -232,12 +273,21 @@ mod tests {
     }
     #[test]
     fn new_2() {
-        let dim = Dimensions::new(2, 2).ok().unwrap();
-        let cfg = BoardConfig::new(dim, 1).ok().unwrap();
-        let board = Board::new(cfg).ok().unwrap();
+        let dim = Dimensions::new(10, 10).ok().unwrap();
+        let cfg = BoardConfig::new(dim, 10).ok().unwrap();
+        let mut board = Board::new(cfg)
+                .unwrap_or_else(|err| {
+                println!("{:?}", err);
+                std::process::exit(1);
+            });
 
-        for (_, tile) in board.iter() {
-            dbg!(tile);
+        println!("{}", board);
+
+        if let Err(err) = board.reveal_coord(&Coords::new(0, 0)) {
+            println!("{:?}", err);
         }
+        println!("{}", board);
+        println!("{}", board.hidden_left);
+
     }
 }
