@@ -1,4 +1,4 @@
-use crate::{board::BoardConfig, coords::Coords, dimensions::Dimensions, tile::TileRevealError};
+use crate::{board::BoardConfig, coords::Coords, tile::TileRevealError};
 
 pub enum Action {
     StartGame {board_config: BoardConfig},
@@ -6,21 +6,22 @@ pub enum Action {
     RevealTile {coords: Coords}
 }
 
-
 pub enum RevealTileResult {
     MineRevealed,
     TileRevealed(SafeTile)
 }
 
 pub enum SafeTile {
-    NormalTile(Coords),
-    LastTile,
+    Normal(Coords),
+    Flood(Vec<Coords>),
+    Last(Coords),
 }
 
 pub enum ActionRevealError {
     InvalidCoordinate,
     AlreadyRevealed,
     Flagged,
+    Unknown,
 }
 
 impl From<TileRevealError> for ActionRevealError {
