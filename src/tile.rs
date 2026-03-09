@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Tile {
     Hidden(TileContent),
@@ -74,7 +76,7 @@ impl Tile {
                 Ok(())
             },
 
-            _ => Err(IncrementEmptyError::NotEmpty)
+            _ =>{Err(IncrementEmptyError::NotEmpty)}
         }
     }
 
@@ -114,5 +116,16 @@ impl Tile {
 impl Default for Tile {
     fn default() -> Self {
         Self::Hidden(TileContent::Empty(0))
+    }
+}
+
+impl Display for Tile {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Hidden(_) => write!(f, "#"),
+            Self::Flagged(_) => write!(f, "F"),
+            Self::Revealed(TileContent::Empty(n)) => write!(f, "{}",n),
+            _ => write!(f, "?"),
+        }
     }
 }
