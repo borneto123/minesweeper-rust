@@ -1,4 +1,3 @@
-use std::collections::VecDeque;
 use crate::action::{ActionRevealError, RevealTileResult, SafeTile};
 use crate::coords::{ Coords};
 use crate::tile::{ Tile, TileContent};
@@ -163,33 +162,33 @@ impl Board {
         tile.reveal_tile()?;
         
         Ok(match  self.no_safe_tiles_left() {
-            true => SafeTile::LastTile,
-            false => SafeTile::NormalTile(*coords)
+            true => SafeTile::Last(*coords),
+            false => SafeTile::Normal(*coords)
         })
     }
 
-    // fn flood_fill_reveal(&mut self, coords: &Coords) -> SafeTile {
-    //     self.single_reveal(coords); // Problem
-    //     let dim = &self.dimensions;
-    //     let mut empty_neighbours = VecDeque::new();
-    //     empty_neighbours.push_back(coords);
+    fn flood_fill_reveal(&mut self, start_coord: &Coords) -> Result<SafeTile, ActionRevealError> {
         
-    //     let empty_neighbours : Vec<Coords>= 
-    //         coords
-    //             .get_neighbours(dim)
-    //             .into_iter()
-    //             .filter(|coord| {
-    //                 let tile = self.get_tile(coord).unwrap();
-    //                 matches!(tile, Tile::Hidden(TileContent::Empty(0)))
-    //             })
-    //             .collect();        
-    //     for coords in empty_neighbours {
-    //         self.single_reveal(&coords);
-    //     }
+        let mut stack  = vec![*start_coord];
+        let mut revealed: Vec<Coords> = Vec::new();
+        let mut reveal_result : Option<SafeTile> = None;
 
-        
-    //     todo!()
-    // }
+        while let Some(coord) = stack.pop() {
+            reveal_result = Some(self.single_reveal(&coord)?);
+            revealed.push(coord);
+
+            for neighbour in coord.get_neighbours(&self.dimensions) {
+                stack.push(neighbour);
+            }
+        }
+        let reveal_result = reveal_result.ok_or(ActionRevealError::Unknown)?;
+
+        match reveal_result {
+            SafeTile::Normal(_) => Ok(SafeTile::Flood(revealed)),
+            SafeTile::Last(coord) => Ok(SafeTile::Last(coord)),
+            SafeTile::Flood(_) => Err(ActionRevealError::Unknown),
+        }
+    }
 
 
     pub fn reveal_coord(&mut self, coord: &Coords) -> Result<RevealTileResult, ActionRevealError> {
@@ -200,9 +199,12 @@ impl Board {
         let content = tile.content();
 
         match content {
-            TileContent::Mine => todo!(),
+            TileContent::Mine => {
+                Ok(RevealTileResult::MineRevealed)
+            },
             TileContent::Empty(0) => {
-                todo!()
+                let result = self.flood_fill_reveal(coord)?;
+                Ok(RevealTileResult::TileRevealed(result))
             },
             TileContent::Empty(_) =>{
                 let result = self.single_reveal(coord)?;
