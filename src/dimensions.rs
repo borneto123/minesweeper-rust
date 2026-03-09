@@ -1,10 +1,12 @@
 use crate::coords::{Coords, CoordsOutOfBoundsError};
 
+#[derive(Debug)]
 
 pub struct Dimensions {
     row_count: i32,
     col_count: i32,
 }
+#[derive(Debug)]
 
 pub  enum DimensionsError {
     NegativeDimensions,
