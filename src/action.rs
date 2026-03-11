@@ -24,9 +24,11 @@ pub enum ActionRevealError {
     InvalidCoordinate,
     AlreadyRevealed,
     Flagged,
-    CoulndtAccesTile,
+    CouldntAccesTile,
     Unknown,
 }
+
+
 
 impl From<TileRevealError> for ActionRevealError {
     fn from(value: TileRevealError) -> Self {

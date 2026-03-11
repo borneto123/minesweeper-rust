@@ -274,7 +274,7 @@ mod tests {
     #[test]
     fn new_2() {
         let dim = Dimensions::new(10, 10).ok().unwrap();
-        let cfg = BoardConfig::new(dim, 10).ok().unwrap();
+        let cfg = BoardConfig::new(dim, 0).ok().unwrap();
         let mut board = Board::new(cfg)
                 .unwrap_or_else(|err| {
                 println!("{:?}", err);
