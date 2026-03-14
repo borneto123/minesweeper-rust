@@ -28,10 +28,7 @@ pub enum TileRevealError {
     Flagged,
 }
 
-pub enum TileFlagError{
-    AlreadyFlagged,
-    Revealed,
-}
+
 
 impl Tile {
     pub fn content(&self) -> &TileContent {
@@ -100,16 +97,12 @@ impl Tile {
         }
     }
 
-    pub fn flag_tile(&mut self) -> Result<(), TileFlagError>{
-        match self {
-            Tile::Flagged(_) => Err(TileFlagError::AlreadyFlagged),
-            Tile::Revealed(_) => Err(TileFlagError::Revealed),
+    pub fn flag_tile(&mut self) {
+        *self = Tile::Flagged(self.take_content());   
+    }
 
-            _ => {
-                *self = Tile::Flagged(self.take_content());
-                Ok(())
-            }
-        }   
+    pub fn unflag_tile(&mut self) {
+        *self = Tile::Hidden(self.take_content());
     }
 
 }

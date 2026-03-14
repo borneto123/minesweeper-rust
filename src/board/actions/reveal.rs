@@ -1,9 +1,49 @@
-use crate::{action::{ActionRevealError, RevealTileResult, SafeTile}, board::Board, coords::Coords, tile::{Tile, TileContent}};
+use crate::{board::Board, coords::Coords, tile::{Tile, TileContent, TileRevealError}};
 
+#[derive(Debug)]
+
+pub enum RevealTileResult {
+    MineRevealed,
+    TileRevealed(SafeTile)
+}
+#[derive(Debug)]
+
+pub enum SafeTile {
+    Normal(Coords),
+    Flood(Vec<Coords>),
+    Last(Coords),
+}
+
+#[derive(Debug)]
+pub enum ActionRevealError {
+    InvalidCoordinate,
+    AlreadyRevealed,
+    Flagged,
+    CouldntAccesTile,
+    Unknown,
+}
 
 impl Board {
-    fn no_safe_tiles_left(&self) -> bool {
-        self.hidden_left == 0
+    pub fn reveal_coord(&mut self, coord: &Coords) -> Result<RevealTileResult, ActionRevealError> {
+        let tile = self
+            .get_tile(&coord)
+            .ok_or(ActionRevealError::InvalidCoordinate)?;
+        
+        let content = tile.content();
+
+        match content {
+            TileContent::Mine => {
+                Ok(RevealTileResult::MineRevealed)
+            },
+            TileContent::Empty(0) => {
+                let result = self.flood_fill_reveal(coord)?;
+                Ok(RevealTileResult::TileRevealed(result))
+            },
+            TileContent::Empty(_) =>{
+                let result = self.single_reveal(coord)?;
+                Ok(RevealTileResult::TileRevealed(result))
+            }
+        }
     }
 
     fn single_reveal(&mut self, coords: &Coords) -> Result<SafeTile, ActionRevealError> {
@@ -42,7 +82,7 @@ impl Board {
             }
 
             if is_zero {
-            for neighbour in coord.get_neighbours(&self.dimensions) {
+                for neighbour in coord.get_neighbours(&self.dimensions) {
                     stack.push(neighbour);
                 }
             }
@@ -55,26 +95,17 @@ impl Board {
             SafeTile::Flood(_) => Err(ActionRevealError::Unknown),
         }
     }
-
-    pub fn reveal_coord(&mut self, coord: &Coords) -> Result<RevealTileResult, ActionRevealError> {
-        let tile = self
-            .get_tile(&coord)
-            .ok_or(ActionRevealError::InvalidCoordinate)?;
-        
-        let content = tile.content();
-
-        match content {
-            TileContent::Mine => {
-                Ok(RevealTileResult::MineRevealed)
-            },
-            TileContent::Empty(0) => {
-                let result = self.flood_fill_reveal(coord)?;
-                Ok(RevealTileResult::TileRevealed(result))
-            },
-            TileContent::Empty(_) =>{
-                let result = self.single_reveal(coord)?;
-                Ok(RevealTileResult::TileRevealed(result))
-            }
-        }
+    fn no_safe_tiles_left(&self) -> bool {
+        self.hidden_left == 0
     }
  }
+
+
+ impl From<TileRevealError> for ActionRevealError {
+    fn from(value: TileRevealError) -> Self {
+        match value {
+            TileRevealError::AlreadyRevealed => ActionRevealError::AlreadyRevealed,
+            TileRevealError::Flagged => Self::Flagged
+        }
+    }
+}

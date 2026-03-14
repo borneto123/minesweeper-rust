@@ -21,8 +21,6 @@ pub struct Board {
 
 }
 
-
-
 impl Board {
      pub fn new(config: BoardConfig) -> Result<Self, BoardError> {
         let vec_size = config.dimensions.area();
@@ -84,5 +82,9 @@ mod tests {
         println!("{}", board);
         println!("{}", board.hidden_left);
 
+        board.toggle_flag(&Coords::new(1, 1));
+        println!("{}", board);
+        board.toggle_flag(&Coords::new(1, 1));
+        println!("{}", board);
     }
 }

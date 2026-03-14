@@ -1,1 +1,2 @@
 mod reveal;
+mod flag;
