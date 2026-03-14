@@ -1,4 +1,4 @@
-use crate::{board::BoardConfig, coords::Coords, tile::TileRevealError};
+use crate::{board::config::BoardConfig, coords::Coords, tile::TileRevealError};
 #[derive(Debug)]
 pub enum Action {
     StartGame {board_config: BoardConfig},
