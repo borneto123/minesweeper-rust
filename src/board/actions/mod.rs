@@ -1,2 +1,2 @@
-mod reveal;
-mod flag;
+pub mod reveal;
+pub mod flag;

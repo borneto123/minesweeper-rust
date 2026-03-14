@@ -2,7 +2,7 @@ mod iter;
 pub mod config;
 mod generate;
 mod access;
-mod actions;
+pub mod actions;
 mod display;
 pub mod error;
 
